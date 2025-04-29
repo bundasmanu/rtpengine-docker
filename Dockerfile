@@ -1,7 +1,6 @@
 FROM debian:stable-slim
 
 ARG RTPENGINE_RELEASE
-ARG RTPENGINE_USER
 
 WORKDIR /tmp
 

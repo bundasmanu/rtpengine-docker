@@ -6,7 +6,6 @@ services:
       dockerfile: Dockerfile
       args:
         RTPENGINE_RELEASE: ${RTPENGINE_RELEASE:-lts}
-        RTPENGINE_USER: ${RTPENGINE_USER}
     environment:
       - RTPENGINE_USER=${RTPENGINE_USER}
       - RTPENGINE_CONF_DIR=${RTPENGINE_CONF_DIR}
