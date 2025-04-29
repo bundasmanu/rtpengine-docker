@@ -12,6 +12,7 @@ RTPEngine build to be used in docker containers, and to easily integrate with sy
   - [Run RTPEngine](#run-rtpengine)
     - [Run Multiple Instances](#run-multiple-instances)
   - [CLI Interface](#cli-interface)
+  - [Some considerations](#some-considerations)
 
 ## Purpose
 
@@ -91,3 +92,8 @@ docker compose up rtpengine -d
 ```sh
 rtpengine-ctl -ip 172.25.0.30 -port 2224 help
 ```
+
+## Some considerations
+
+- `.conf` files are copied from the host to the container, and the ENV var substitution is done after;
+- Another possible approach is to handle this files as templates, and use `ansible`, `consul`, ..., to manage this files, and use volumes instead;
