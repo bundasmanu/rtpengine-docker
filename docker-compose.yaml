@@ -1,0 +1,40 @@
+services:
+
+  rtpengine:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      args:
+        RTPENGINE_RELEASE: ${RTPENGINE_RELEASE:-lts}
+        RTPENGINE_USER: ${RTPENGINE_USER}
+    environment:
+      - RTPENGINE_USER=${RTPENGINE_USER}
+      - RTPENGINE_CONF_DIR=${RTPENGINE_CONF_DIR}
+      - RTPENGINE_LOG_DIR=${RTPENGINE_LOG_DIR}
+      - RTPENGINE_LOG_FILENAME=${RTPENGINE_LOG_FILENAME}
+      - RTPENGINE_RECORDINGS_DIR=${RTPENGINE_RECORDINGS_DIR}
+      - LISTEN_IP_DEFAULT_INTERFACE=${LISTEN_IP_DEFAULT_INTERFACE}
+      - MIN_PORT_DEFAULT_INTERFACE=${MIN_PORT_DEFAULT_INTERFACE}
+      - MAX_PORT_DEFAULT_INTERFACE=${MAX_PORT_DEFAULT_INTERFACE}
+      - LISTEN_IP_NG=${LISTEN_IP_NG}
+      - LISTEN_PORT_NG=${LISTEN_PORT_NG}
+      - LISTEN_IP_CLI=${LISTEN_IP_CLI}
+      - LISTEN_PORT_CLI=${LISTEN_PORT_CLI}
+    container_name: rtpengine
+    volumes:
+      - ./log/:${RTPENGINE_LOG_DIR}
+      - ./recordings/:${RTPENGINE_RECORDINGS_DIR}
+    networks:
+      common-network:
+        ipv4_address: 172.25.0.30
+    cap_add:
+      - NET_ADMIN
+      - SYS_TIME
+      - SYS_NICE
+    tty: true
+    privileged: true
+    platform: linux/amd64
+
+networks:
+  common-network:
+    external: true
