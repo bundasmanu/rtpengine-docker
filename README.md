@@ -9,7 +9,7 @@ RTPEngine build to be used in docker containers, and to easily integrate with sy
   - [Networks](#networks)
   - [Integration with Kamailio](#integration-with-kamailio)
   - [Build image](#build-image)
-  - [Run Kamailio](#run-kamailio)
+  - [Run RTPEngine](#run-rtpengine)
     - [Run Multiple Instances](#run-multiple-instances)
   - [CLI Interface](#cli-interface)
 
@@ -66,7 +66,7 @@ We only need to update some env vars in [kamailio-docker](https://github.com/bun
 docker compose build rtpengine
 ```
 
-## Run Kamailio
+## Run RTPEngine
 
 ```sh
 docker compose up rtpengine -d
