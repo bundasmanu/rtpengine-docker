@@ -12,6 +12,7 @@ RTPEngine build to be used in docker containers, and to easily integrate with sy
   - [Run RTPEngine](#run-rtpengine)
     - [Run Multiple Instances](#run-multiple-instances)
   - [CLI Interface](#cli-interface)
+  - [Kubernetes](#kubernetes)
   - [Some considerations](#some-considerations)
 
 ## Purpose
@@ -91,6 +92,24 @@ docker compose up rtpengine -d
 
 ```sh
 rtpengine-ctl -ip 172.25.0.30 -port 2224 help
+```
+
+## Kubernetes
+
+This image can be used in Kubernetes, but it is not yet tested massively.
+Helm charts are provided in the `helm` folder, and can be used to deploy the `RTPEngine` container in a Kubernetes cluster.
+Please adapt the `values.yaml` and `configmap.yml` file to your needs, and then run:
+
+```sh
+helm install --dry-run --debug rtpengine-docker ./helm/rtpengine-docker
+helm upgrade --install rtpengine-docker ./helm/rtpengine-docker
+```
+
+`pvc` is used to store the recordings, and also logs.
+Logs are available in isolated `pvcs`, and can be used to debug the container in case of issues.
+
+```sh
+kubectl exec -it rtpengine-a -- cat /etc/rtpengine/logs/rtpengine.log
 ```
 
 ## Some considerations
