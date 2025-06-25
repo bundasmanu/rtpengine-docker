@@ -1,0 +1,56 @@
+{{- range .Values.pods }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ .name }}
+  labels:
+    app: {{ .name }}
+spec:
+  hostNetwork: true
+  containers:
+    - name: rtpengine
+      image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
+      securityContext:
+        privileged: true
+        capabilities:
+          add:
+            - SYS_NICE
+            - NET_ADMIN
+            - NET_RAW
+      env:
+        - name: LISTEN_IP
+          value: "{{ .listenIP }}"
+        - name: RTPENGINE_USER
+          value: {{ $.Values.rtpengine.user }}
+        - name: RTPENGINE_CONF_DIR
+          value: "/etc/rtpengine"
+        - name: RTPENGINE_LOG_DIR
+          value: {{ $.Values.rtpengine.logDir }}
+        - name: RTPENGINE_LOG_FILENAME
+          value: {{ $.Values.rtpengine.logFilename }}
+      ports:
+        - containerPort: {{ .ports.ng }}
+        - containerPort: {{ .ports.cli }}
+        - containerPort: {{ .ports.rtp }}
+      volumeMounts:
+        - name: config
+          mountPath: /etc/rtpengine/rtpengine.conf
+          subPath: {{ .name }}.conf
+        - name: log
+          mountPath: {{ $.Values.rtpengine.logDir }}
+        - name: recordings
+          mountPath: {{ $.Values.rtpengine.recordingsDir }}
+      # Add other container configuration as needed
+  volumes:
+    - name: config
+      configMap:
+        name: {{ $.Release.Name }}-rtpengine-config
+    - name: log
+      persistentVolumeClaim:
+        claimName: {{ $.Release.Name }}-log-{{ .name }}-pvc
+    - name: recordings
+      persistentVolumeClaim:
+        claimName: {{ $.Release.Name }}-recordings-pvc
+  # Optionally, add nodeSelector or affinity if you want to schedule on specific nodes
+---
+{{- end }}
