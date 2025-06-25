@@ -33,6 +33,7 @@ WORKDIR /usr/local/src
 
 COPY entrypoint.sh .
 
+RUN mkdir -p /etc/rtpengine/conf
 COPY conf/rtpengine.conf /etc/rtpengine/conf
 COPY syslog/rtpengine-logrotate.conf /etc/logrotate.d/rtpengine
 COPY syslog/rtpengine-syslog.conf /etc/rsyslog.d/rtpengine.conf
