@@ -19,6 +19,8 @@ services:
       - LISTEN_PORT_NG=${LISTEN_PORT_NG}
       - LISTEN_IP_CLI=${LISTEN_IP_CLI}
       - LISTEN_PORT_CLI=${LISTEN_PORT_CLI}
+      - LISTEN_IP_HTTP=${LISTEN_IP_HTTP}
+      - LISTEN_PORT_HTTP=${LISTEN_PORT_HTTP}
     container_name: rtpengine
     volumes:
       - ./log/:${RTPENGINE_LOG_DIR}
