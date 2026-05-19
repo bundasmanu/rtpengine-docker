@@ -10,7 +10,7 @@ service:
     name: rtpengine
 
 image:
-  repository: bundasmanu/rtpengine
+  repository: bundasmanu/rtpengine-docker
   tag: latest
   pullPolicy: Always
 
