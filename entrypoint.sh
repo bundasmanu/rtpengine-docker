@@ -31,14 +31,11 @@ update_rsyslog() {
 }
 
 resolve_pod_dns() {
-    if [ -n "$HEADLESS_SERVICE_NAME" ] && [ -n "$POD_NAMESPACE" ]; then
-        POD_HOSTNAME="${HOSTNAME:-${POD_NAME}}"
-        POD_DNS="${POD_HOSTNAME}.${HEADLESS_SERVICE_NAME}.${POD_NAMESPACE}.svc.cluster.local"
-        export LISTEN_IP_INTERNAL="${LISTEN_IP_INTERNAL:-$POD_DNS}"
-        export LISTEN_IP_NG="${LISTEN_IP_NG:-$POD_DNS}"
-        export LISTEN_IP_CLI="${LISTEN_IP_CLI:-$POD_DNS}"
-        export LISTEN_IP_HTTP="${LISTEN_IP_HTTP:-$POD_DNS}"
-    fi
+    POD_DNS="${POD_NAME}.${INSTANCE_NAME}.${POD_NAMESPACE}.svc.cluster.local"
+    export LISTEN_IP_INTERNAL="${LISTEN_IP_INTERNAL:-$POD_DNS}"
+    export LISTEN_IP_NG="${LISTEN_IP_NG:-$POD_DNS}"
+    export LISTEN_IP_CLI="${LISTEN_IP_CLI:-$POD_DNS}"
+    export LISTEN_IP_HTTP="${LISTEN_IP_HTTP:-$POD_DNS}"
 }
 
 case "$1" in
