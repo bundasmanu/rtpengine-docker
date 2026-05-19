@@ -1,16 +1,13 @@
-pods:
-  - name: rtpengine-a
-    listenIP: "127.0.0.1"
-    ports:
-      ng: 2223
-      cli: 2224
-      rtp: 22222
-  - name: rtpengine-b
-    listenIP: "172.27.27.27"
-    ports:
-      ng: 2323
-      cli: 2324
-      rtp: 23222
+namespace: rtpengine
+namespaceCreate: true
+
+statefulset:
+  name: rtpengine
+  replicas: 1
+
+service:
+  headless:
+    name: rtpengine
 
 image:
   repository: bundasmanu/rtpengine
@@ -19,10 +16,15 @@ image:
 
 rtpengine:
   user: rtpengine
-  confDir: /etc/rtpengine
+  confDir: /etc/rtpengine/conf
   logDir: /etc/rtpengine/logs
   recordingsDir: /etc/rtpengine/recordings
   logFilename: rtpengine
+  listen:
+    externalIP: "127.0.0.1"
+    ngPort: 2223
+    cliPort: 2224
+    httpPort: 2226
   defaultInterface:
     minPort: 10000
     maxPort: 20000

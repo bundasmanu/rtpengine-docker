@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.service.headless.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: rtpengine
+    release: {{ .Release.Name }}
+spec:
+  clusterIP: None
+  selector:
+    app: rtpengine
+    release: {{ .Release.Name }}
+  ports:
+    - name: ng
+      port: {{ .Values.rtpengine.listen.ngPort }}
+    - name: cli
+      port: {{ .Values.rtpengine.listen.cliPort }}
+    - name: http
+      port: {{ .Values.rtpengine.listen.httpPort }}

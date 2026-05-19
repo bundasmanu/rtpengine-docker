@@ -39,7 +39,8 @@ The main reasons behind the need to create this repo, are mainly:
 - `RTPENGINE_LOG_DIR`: Folder to store the generated logs (rsyslog and logrotate handling);
 - `RTPENGINE_LOG_FILENAME`: Name of the log file (when scaling, update the name to be unique, between instances);
 - `RTPENGINE_RECORDINGS_DIR`: Folder to store the generated recordings;
-- `LISTEN_IP_DEFAULT_INTERFACE`: IP address of the default interface (if you want to use multiple interfaces, please update `rtpengine.conf` accordingly);
+- `LISTEN_IP_INTERNAL`: IP or hostname for the internal RTP interface (in Kubernetes, set automatically from StatefulSet DNS);
+- `LISTEN_IP_EXTERNAL`: IP for the external RTP interface (default `127.0.0.1` in Helm; override via ArgoCD when the public IP is known);
 - `MIN_PORT_DEFAULT_INTERFACE`: Minimum port to be used by the default interface;
 - `MAX_PORT_DEFAULT_INTERFACE`: Maximum port to be used by the default interface;
 - `LISTEN_IP_NG`: IP to listen for the NG protocol;
@@ -96,23 +97,66 @@ rtpengine-ctl -ip 172.25.0.30 -port 2224 help
 
 ## Kubernetes
 
-This image can be used in Kubernetes, but it is not yet tested massively.
-Helm charts are provided in the `helm` folder, and can be used to deploy the `RTPEngine` container in a Kubernetes cluster.
-Please adapt the `values.yaml` and `configmap.yml` file to your needs, and then run:
+Helm deploys RTPEngine as a **StatefulSet** in the **`rtpengine`** namespace, with **`hostNetwork: true`**. [`conf/rtpengine.conf`](conf/rtpengine.conf) is baked into the image; the chart only passes **environment variables** so `entrypoint.sh` can run `envsubst` at startup.
+
+### Install
 
 ```sh
-helm install --dry-run --debug rtpengine-docker ./helm/rtpengine-docker
-helm upgrade --install rtpengine-docker ./helm/rtpengine-docker
+helm upgrade --install rtpengine ./helm/rtpengine-docker \
+  --namespace rtpengine --create-namespace
 ```
 
-`pvc` is used to store the recordings, and also logs.
-Logs are available in isolated `pvcs`, and can be used to debug the container in case of issues.
+Dry-run:
 
 ```sh
-kubectl exec -it rtpengine-a -- cat /etc/rtpengine/logs/rtpengine.log
+helm upgrade --install rtpengine ./helm/rtpengine-docker \
+  --namespace rtpengine --create-namespace \
+  --dry-run --debug
 ```
+
+Rebuild the image after changing `conf/rtpengine.conf`.
+
+### Values (scaling and external IP)
+
+| Value | Default | Purpose |
+|-------|---------|---------|
+| `statefulset.replicas` | `1` | Number of pods |
+| `rtpengine.listen.externalIP` | `127.0.0.1` | External interface IP (override when ready) |
+| `rtpengine.listen.ngPort` / `cliPort` / `httpPort` | `2223` / `2224` / `2226` | Listen ports |
+
+Per-pod **internal** listen addresses and **NG/CLI/HTTP** use StatefulSet DNS (`rtpengine-0.rtpengine.rtpengine.svc.cluster.local`, …), resolved in `entrypoint.sh` when `HEADLESS_SERVICE_NAME` and `POD_NAMESPACE` are set.
+
+### ArgoCD example
+
+```yaml
+spec:
+  destination:
+    namespace: rtpengine
+  source:
+    helm:
+      valueFiles:
+        - values.yaml
+      parameters:
+        - name: statefulset.replicas
+          value: "1"
+        - name: rtpengine.listen.externalIP
+          value: "203.0.113.10"
+```
+
+### Logs and recordings
+
+- Logs: one PVC per pod via `volumeClaimTemplates` (`log-rtpengine-0`, …).
+- Recordings: shared PVC `{{ release }}-recordings-pvc`.
+
+```sh
+kubectl -n rtpengine exec -it rtpengine-0 -- cat /etc/rtpengine/logs/rtpengine.log
+```
+
+### Scaling notes
+
+With `hostNetwork`, replicas share the same ports — typically **one rtpengine pod per node**. When `replicas > 1`, configure Kamailio (or your control plane) to target each pod’s stable DNS name.
 
 ## Some considerations
 
-- `.conf` files are copied from the host to the container, and the ENV var substitution is done after;
-- Another possible approach is to handle this files as templates, and use `ansible`, `consul`, ..., to manage this files, and use volumes instead;
+- `.conf` files are copied into the image at build time; ENV var substitution runs at container start via `entrypoint.sh`;
+- In Kubernetes, Helm only supplies environment variables (no ConfigMap for `rtpengine.conf`);
