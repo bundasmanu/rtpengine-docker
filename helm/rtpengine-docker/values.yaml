@@ -11,7 +11,7 @@ service:
 
 image:
   repository: bundasmanu/rtpengine
-  tag: 1.0.0
+  tag: latest
   pullPolicy: Always
 
 rtpengine:
