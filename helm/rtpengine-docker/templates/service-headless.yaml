@@ -8,6 +8,7 @@ metadata:
     release: {{ .Release.Name }}
 spec:
   clusterIP: None
+  publishNotReadyAddresses: true
   selector:
     app: rtpengine
     release: {{ .Release.Name }}
